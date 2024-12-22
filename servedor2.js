@@ -1,12 +1,11 @@
-
-const path = require('path');
-const puppeteer = require('puppeteer');
-const cors = require('cors'); // Importa o middleware cors
 const express = require('express');
+const puppeteer = require('puppeteer');
+const cors = require('cors');
+const path = require('path');
+
 const app = express();
 const port = process.env.PORT || 8080;
 
-// Ativa o CORS para todas as rotas
 app.use(cors());
 
 // Middleware para servir arquivos estáticos
@@ -15,7 +14,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Endpoint para buscar dados do perfil
 app.get('/profile/:username', async (req, res) => {
     const { username } = req.params;
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] // Adiciona essas opções
+    });
     const page = await browser.newPage();
 
     try {
@@ -27,17 +29,19 @@ app.get('/profile/:username', async (req, res) => {
 
         res.json({ username, description });
     } catch (error) {
+        console.error('Erro ao buscar perfil do Instagram:', error);
         res.json({ error: 'Erro ao buscar os dados do perfil.' });
     } finally {
         await browser.close();
     }
 });
 
-// Inicia o servidor
+// Teste simples de funcionamento
 app.get('/', (req, res) => {
     res.send('Servidor funcionando no Railway!');
-  });
-  
-  app.listen(port, () => {
+});
+
+// Inicia o servidor
+app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}`);
-  });
+});
