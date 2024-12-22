@@ -4,8 +4,11 @@
     "description": "Servidor Node.js para Railway",
     "main": "servedor2.js",
     "scripts": {
-      "start": "node servedor2.js"
+        "start": "node servedor2.js"
     },
     "author": "",
-    "license": "ISC"
-  }
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.21.2"
+    }
+}
