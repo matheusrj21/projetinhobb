@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisar Perfis do Instagram</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Buscar Perfis do Instagram</h1>
+    <p>Digite o nome de usuário do Instagram que deseja pesquisar:</p>
+    
+    <!-- Campo de entrada para o nome do perfil -->
+    <input type="text" id="usernameInput" placeholder="Digite o nome de usuário" />
+    <button id="searchButton">Pesquisar</button>
+    
+    <div id="result">
+        <p>Informações do perfil aparecerão aqui...</p>
+    </div>
+
+    <script>
+        document.getElementById('searchButton').addEventListener('click', async () => {
+            // Obtém o valor digitado no campo de entrada
+            const username = document.getElementById('usernameInput').value.trim();
+
+            // Verifica se o campo está vazio
+            if (!username) {
+                alert('Por favor, insira um nome de usuário.');
+                return;
+            }
+
+            try {
+                // Faz a requisição para o servidor com o nome de usuário fornecido
+                const response = await fetch(`http://localhost:3000/profile/${username}`);
+                if (!response.ok) {
+                    throw new Error('Erro na requisição');
+                }
+
+                // Converte a resposta para JSON
+                const data = await response.json();
+
+                // Exibe as informações no HTML
+                const resultDiv = document.getElementById('result');
+                if (data.error) {
+                    resultDiv.innerHTML = `<p><strong>Erro:</strong> ${data.error}</p>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p><strong>Usuário:</strong> ${data.username}</p>
+                        <p><strong>Descrição:</strong> ${data.description}</p>
+                    `;
+                }
+            } catch (error) {
+                // Exibe mensagem de erro
+                document.getElementById('result').innerHTML = `<p><strong>Erro:</strong> ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
