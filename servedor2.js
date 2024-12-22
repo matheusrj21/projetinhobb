@@ -1,4 +1,4 @@
-const express = require('express');
+
 const path = require('path');
 const puppeteer = require('puppeteer');
 const cors = require('cors'); // Importa o middleware cors
