@@ -2,7 +2,7 @@
     "name": "meu-projeto",
     "version": "1.0.0",
     "description": "Servidor Node.js para Railway",
-    "main": "servidor2.js",
+    "main": "servedor2.js",
     "scripts": {
       "start": "node servedor2.js"
     },
