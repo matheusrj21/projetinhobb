@@ -1,14 +1,18 @@
 const express = require('express');
 const path = require('path');
 const puppeteer = require('puppeteer');
-const cors = require('cors');
+const cors = require('cors'); // Importa o middleware cors
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
+// Ativa o CORS para todas as rotas
 app.use(cors());
+
+// Middleware para servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Endpoint para buscar dados do perfil
 app.get('/profile/:username', async (req, res) => {
     const { username } = req.params;
     const browser = await puppeteer.launch({ headless: true });
@@ -18,26 +22,22 @@ app.get('/profile/:username', async (req, res) => {
         const profileUrl = `https://www.instagram.com/${username}/`;
         await page.goto(profileUrl, { waitUntil: 'networkidle2' });
 
-        // Espera o seletor da foto do perfil aparecer e pega a URL da imagem
-        await page.waitForSelector('img[alt^="Foto do perfil"]');
-        const profilePic = await page.$eval('img[alt^="Foto do perfil"]', (img) => img.src);
-
-        // Extração da descrição do perfil
+        // Aguarda o carregamento da imagem do perfil e a descrição
         await page.waitForSelector('meta[name="description"]');
         const description = await page.$eval('meta[name="description"]', el => el.content);
 
-        res.json({
-            username,
-            description,
-            profilePic, // Passa a URL da imagem do perfil
-        });
+        // Pega a URL da foto do perfil
+        const profilePicture = await page.$eval('alt^="Foto do perfil"]', img => img.src);
+
+        // Envia os dados do perfil
+        res.json({ username, description, profilePicture });
     } catch (error) {
         res.json({ error: 'Erro ao buscar os dados do perfil.' });
     } finally {
         await browser.close();
     }
 });
-
+// Inicia o servidor
 app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
