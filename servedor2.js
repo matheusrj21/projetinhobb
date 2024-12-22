@@ -2,9 +2,9 @@ const express = require('express');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const cors = require('cors'); // Importa o middleware cors
-
+const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 // Ativa o CORS para todas as rotas
 app.use(cors());
@@ -34,6 +34,10 @@ app.get('/profile/:username', async (req, res) => {
 });
 
 // Inicia o servidor
-app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
+app.get('/', (req, res) => {
+    res.send('Servidor funcionando no Railway!');
+  });
+  
+  app.listen(port, () => {
+    console.log(`Servidor rodando na porta ${port}`);
+  });
