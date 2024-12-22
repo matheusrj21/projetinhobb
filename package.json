@@ -4,7 +4,7 @@
     "description": "Servidor Node.js para Railway",
     "main": "servidor2.js",
     "scripts": {
-      "start": "node servidor2.js"
+      "start": "node servedor2.js"
     },
     "author": "",
     "license": "ISC"
