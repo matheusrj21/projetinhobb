@@ -1,0 +1,11 @@
+{
+    "name": "meu-projeto",
+    "version": "1.0.0",
+    "description": "Servidor Node.js para Railway",
+    "main": "servidor2.js",
+    "scripts": {
+      "start": "node servidor2.js"
+    },
+    "author": "",
+    "license": "ISC"
+  }
