@@ -15,5 +15,10 @@
     },
     "devDependencies": {
     "nodemon": "^2.0.15"
+  },
+  "puppeteer": {
+  "defaultBrowserFetcherOptions": {
+    "baseUrl": "https://storage.googleapis.com/chromium-browser-snapshots"
   }
+}
 }
