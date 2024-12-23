@@ -15,6 +15,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/profile/:username', async (req, res) => {
     const { username } = req.params;
 
+    // Validação do nome de usuário
     if (!/^[a-zA-Z0-9._]+$/.test(username)) {
         return res.json({ error: 'Nome de usuário inválido.' });
     }
@@ -27,22 +28,31 @@ app.get('/profile/:username', async (req, res) => {
 
     try {
         const profileUrl = `https://www.instagram.com/${username}/`;
-        await page.goto(profileUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+        
+        // Log para verificar se o navegador está indo para a URL correta
+        console.log(`Acessando: ${profileUrl}`);
+        
+        await page.goto(profileUrl, { 
+            waitUntil: 'networkidle2', 
+            timeout: 30000 
+        });
 
-        // Busca a descrição do perfil
-        await page.waitForSelector('meta[name="description"]');
+        // Aguarda a presença da meta descrição
+        await page.waitForSelector('meta[name="description"]', { timeout: 15000 });
         const description = await page.$eval('meta[name="description"]', el => el.content);
 
-        // Busca a imagem do perfil pelo atributo "alt"
+        // Log para verificar se o seletor da imagem está correto
         const profilePicture = await page.$eval(
             'img[alt^="Foto do perfil de"]',
             el => el.src
         );
+        
+        console.log(`Imagem do perfil: ${profilePicture}`);
 
         res.json({ username, description, profilePicture });
     } catch (error) {
         console.error(`Erro ao buscar perfil do Instagram para o usuário ${username}:`, error);
-        res.json({ error: 'Erro ao buscar os dados do perfil.' });
+        res.json({ error: 'Erro ao buscar os dados do perfil. Pode ser que o perfil esteja privado ou não exista.' });
     } finally {
         await browser.close();
     }
