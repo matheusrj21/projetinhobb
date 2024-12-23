@@ -4,9 +4,15 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 5432;
+const port = process.env.PORT || 5432;  
 
-app.use(cors());
+// Configuração do CORS
+const corsOptions = {
+    origin: 'http://localhost:3000',  // Permite requisições do frontend local
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
+};
+app.use(cors(corsOptions));
 
 // Middleware para servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
@@ -20,47 +26,52 @@ app.get('/profile/:username', async (req, res) => {
         return res.json({ error: 'Nome de usuário inválido.' });
     }
 
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-    const page = await browser.newPage();
-
+    let browser;
     try {
+        // Inicia o Puppeteer com as opções para contornar restrições
+        browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']  // Adiciona argumentos necessários para rodar em ambientes locais
+        });
+        const page = await browser.newPage();
+
         const profileUrl = `https://www.instagram.com/${username}/`;
         
-        // Log para verificar se o navegador está indo para a URL correta
         console.log(`Acessando: ${profileUrl}`);
-        
+
+        // Tenta acessar o perfil e aguardar o carregamento da página
         await page.goto(profileUrl, { 
-            waitUntil: 'networkidle2', 
-            timeout: 30000 
+            waitUntil: 'domcontentloaded', 
+            timeout: 60000  // Aumentando o tempo de timeout para 60 segundos
         });
 
-        // Aguarda a presença da meta descrição
-        await page.waitForSelector('meta[name="description"]', { timeout: 15000 });
+        // Aguarda a presença do seletor meta-description
+        await page.waitForSelector('meta[name="description"]', { timeout: 30000 });
+
+        // Extrai as informações do perfil
         const description = await page.$eval('meta[name="description"]', el => el.content);
+       
 
-        // Log para verificar se o seletor da imagem está correto
-        const profilePicture = await page.$eval(
-            'img[alt^="Foto do perfil de"]',
-            el => el.src
-        );
+        console.log(`Descrição: ${description}`);
         
-        console.log(`Imagem do perfil: ${profilePicture}`);
 
-        res.json({ username, description, profilePicture });
+        // Retorna as informações como JSON
+        res.json({ username, description });
+
     } catch (error) {
         console.error(`Erro ao buscar perfil do Instagram para o usuário ${username}:`, error);
         res.json({ error: 'Erro ao buscar os dados do perfil. Pode ser que o perfil esteja privado ou não exista.' });
     } finally {
-        await browser.close();
+        // Garante que o browser seja fechado mesmo em caso de erro
+        if (browser) {
+            await browser.close();
+        }
     }
 });
 
 // Teste simples de funcionamento
 app.get('/', (req, res) => {
-    res.send('Servidor funcionando no Railway!');
+    res.send('Servidor funcionando no localhost!');
 });
 
 // Inicia o servidor
