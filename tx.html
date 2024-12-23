@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar Perfil do Instagram</title>
+</head>
+<body>
+    <h1>Buscar Perfil do Instagram</h1>
+
+    <label for="username">Digite o nome de usuário:</label>
+    <input type="text" id="link1" placeholder="Exemplo: mts.l12">
+    
+    <div id="followers"></div>
+
+    <script>
+        let timeout;
+        document.getElementById('link1').addEventListener('input', async (event) => {
+            const username = event.target.value.trim();
+
+            // Limpar o timeout anterior
+            clearTimeout(timeout);
+
+            // Se o campo estiver vazio, não faz nada
+            if (!username) {
+                document.getElementById('followers').innerHTML = '';
+                return;
+            }
+
+            // Definir um novo timeout para que a ação seja disparada após o usuário parar de digitar
+            timeout = setTimeout(async () => {
+                try {
+                    // Envia a solicitação para o servidor backend
+                    const response = await fetch(`http://localhost:5432/profile/${username}`);
+                    const data = await response.json();
+
+                    const resultDiv = document.getElementById('followers');
+                    resultDiv.innerHTML = '';
+
+                    if (data.error) {
+                        resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <h3>Perfil de ${data.username}</h3>
+                            <p><strong>Descrição:</strong> ${data.description}</p>
+                            <p><strong>Imagem do Perfil:</strong></p>
+                            <img src="${data.profilePicture}" alt="Imagem do perfil de ${data.username}" />
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Erro ao consultar perfil:', error);
+                    document.getElementById('followers').innerHTML = '<p class="error">Erro ao buscar os dados do perfil.</p>';
+                }
+            }, 1000); // A requisição será feita 1 segundo após o usuário parar de digitar
+        });
+    </script>
+</body>
+</html>
